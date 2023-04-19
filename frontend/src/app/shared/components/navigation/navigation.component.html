@@ -1,0 +1,25 @@
+<mat-toolbar>
+  <button
+    mat-icon-button
+    [matMenuTriggerFor]="menu"
+    class="example-icon"
+    aria-label="Example icon-button with menu icon"
+  >
+    <mat-icon>menu</mat-icon>
+  </button>
+  <mat-menu #menu="matMenu">
+    <button mat-menu-item (click)="home()">
+      <mat-icon>home</mat-icon>
+      <span>Home</span>
+    </button>
+    <button mat-menu-item *ngIf="authenticated$ | async" (click)="signout()">
+      <mat-icon>logout</mat-icon>
+      <span>Sign Out</span>
+    </button>
+    <button mat-menu-item *ngIf="!(authenticated$ | async)" (click)="signin()">
+      <mat-icon>login</mat-icon>
+      <span>Sign In</span>
+    </button>
+  </mat-menu>
+  <span>My App</span>
+</mat-toolbar>

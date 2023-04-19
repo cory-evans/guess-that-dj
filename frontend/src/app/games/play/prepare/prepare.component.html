@@ -1,0 +1,73 @@
+<div class="flex flex-col space-y-2 m-2" *ngIf="user$ | async as user">
+  <pre>{{ game | json }}</pre>
+  <mat-card *ngIf="game">
+    <mat-card-header>
+      <mat-card-title>{{ game.owner }}'s game</mat-card-title>
+    </mat-card-header>
+    <mat-card-actions align="end">
+      <button mat-raised-button *ngIf="game.owner == user.id" color="primary">Start</button>
+    </mat-card-actions>
+  </mat-card>
+  <mat-card>
+    <mat-card-header>
+      <mat-card-title>My Songs</mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+      <mat-list>
+        <ng-container *ngFor="let t of my_tracks; let last=last">
+          <mat-list-item>
+            <mat-icon matListItemAvatar>
+              <img [src]="t.track_album_image_url" />
+            </mat-icon>
+            <div matListItemTitle>{{t.track_name}}</div>
+            <div matListItemLine>{{ t.track_artists_csv }}</div>
+          </mat-list-item>
+
+          <mat-divider *ngIf="!last" />
+        </ng-container>
+      </mat-list>
+    </mat-card-content>
+  </mat-card>
+
+  <mat-card *ngIf="my_tracks.length < (game?.entries_per_player || 0)">
+    <mat-card-header>
+      <mat-card-title> Search </mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+      <div>
+        <mat-form-field class="example-form-field">
+          <!-- <mat-label>Clearable input</mat-label> -->
+          <input
+            matInput
+            type="text"
+            [(ngModel)]="value"
+            (input)="onInput.next($event)"
+          />
+          <button
+            matSuffix
+            mat-icon-button
+            aria-label="Clear"
+            (click)="value = ''"
+          >
+            <mat-icon>close</mat-icon>
+          </button>
+        </mat-form-field>
+      </div>
+
+      <mat-list>
+        <ng-container
+          *ngFor="let track of searchResults$ | async; let last=last"
+        >
+        <mat-list-item (click)="add_track(track)" role="button">
+          <mat-icon matListItemAvatar>
+            <img [src]="track.album.images[0].url" [alt]="track.album.name">
+          </mat-icon>
+          <div matListItemTitle>{{track.name}}</div>
+          <div matListItemLine>{{ get_artists_text(track.artists) }}</div>
+        </mat-list-item>
+        <mat-divider *ngIf="!last" />
+      </ng-container>
+      </mat-list>
+    </mat-card-content>
+  </mat-card>
+</div>

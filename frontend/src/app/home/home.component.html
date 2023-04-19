@@ -1,0 +1,22 @@
+<div class="grid place-items-center h-full">
+  <div class="flex flex-col space-y-2">
+
+    <app-avatar-icon *ngIf="user$ | async as user" [userId]="user.id" />
+
+    <a
+      *ngIf="!(authenticated$ | async)"
+      [routerLink]="['auth', 'signin']"
+      mat-raised-button
+      >Sign In</a
+    >
+    <a
+      *ngIf="authenticated$ | async"
+      [routerLink]="['auth', 'signout']"
+      mat-raised-button
+      >Sign Out</a
+    >
+    <a *ngIf="authenticated$ | async" [routerLink]="['games', 'list']" mat-raised-button
+      >Games</a
+    >
+  </div>
+</div>

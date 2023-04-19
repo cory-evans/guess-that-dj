@@ -1,0 +1,17 @@
+<mat-list *ngIf="games | async as games">
+  <ng-container *ngIf="games.length > 0; else noGames">
+    <mat-card *ngFor="let g of games">
+      <mat-card-content>
+        <span>{{ g.id }}</span>
+        <span>{{ g.owner }}</span>
+      </mat-card-content>
+      <mat-card-actions align="end">
+        <button mat-button (click)="joinGame(g.id)">Join</button>
+      </mat-card-actions>
+    </mat-card>
+  </ng-container>
+
+  <ng-template #noGames>
+    <span> No Games to display </span>
+  </ng-template>
+</mat-list>

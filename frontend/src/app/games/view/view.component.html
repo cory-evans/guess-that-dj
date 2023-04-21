@@ -1,8 +1,33 @@
-<div
-  class="flex flex-col space-y-2 m-2"
-  *ngIf="gameState$ | async as gameState"
->
-  <ng-container [ngSwitch]="gameState[0]">
-    <app-game-prepare *ngSwitchCase="'prepare'" [game]="game$ | async" />
-  </ng-container>
-</div>
+<ng-container *ngIf="game$ | async as game">
+  <div
+    class="flex-1 flex flex-col space-y-2 m-2 h-full"
+    *ngIf="gameState$ | async as gameState"
+  >
+    <ng-container [ngSwitch]="gameState.view">
+      <app-game-prepare *ngSwitchCase="'prepare'" [game]="game" [owner]="owner$ | async" />
+
+      <app-game-round-vote *ngSwitchCase="'vote'" [gameTrackId]="gameState.songs[gameState.index]" [members]="game.members_json" />
+      <app-game-round-review *ngSwitchCase="'review'" [gameTrackId]="gameState.songs[gameState.index]" [game]="game" />
+
+      <app-game-scoreboard *ngSwitchCase="'scoreboard'" />
+    </ng-container>
+
+    <div class="flex-1"></div>
+
+    <div class="flex justify-between">
+      <div>
+        <ng-container *ngIf="game.owner == (user$ | async)?.id && gameState.view !== 'prepare'">
+          <button mat-raised-button (click)="backToLobby()">
+            <mat-icon>arrow_back</mat-icon>
+            Lobby
+          </button>
+        </ng-container>
+      </div>
+      <button mat-raised-button color="primary" *ngIf="gameState.view === 'vote' || gameState.view === 'review'" (click)="next()">
+        Next
+        <mat-icon iconPositionEnd>arrow_forward</mat-icon>
+      </button>
+    </div>
+  </div>
+
+</ng-container>

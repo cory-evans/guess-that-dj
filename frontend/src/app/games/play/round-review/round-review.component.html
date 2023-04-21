@@ -1,1 +1,28 @@
-<p>round-review works!</p>
+<div class="flex flex-col space-y-2" *ngIf="gameTrack$ | async as track">
+  <mat-card>
+    <mat-card-header>
+      <img [src]="track.track_album_image_url" mat-card-avatar class="max-w-xs mb-2" />
+      <mat-card-title>{{ track.track_name }}</mat-card-title>
+      <mat-card-subtitle>{{ track.track_artists_csv }}</mat-card-subtitle>
+    </mat-card-header>
+  </mat-card>
+
+  <mat-card *ngIf="game">
+    <mat-card-header>
+      <mat-card-title>Results</mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+      <mat-list>
+        <ng-container *ngFor="let m of game.members_json; let last=last">
+          <div class="rounded" [ngClass]="getResultFor(m.id) | async">
+            <mat-list-item>
+              <app-avatar-icon matListItemAvatar [userId]="m.id" size="auto" />
+              <div matListItemTitle>{{ m.username }}</div>
+            </mat-list-item>
+          </div>
+          <mat-divider *ngIf="!last" />
+        </ng-container>
+      </mat-list>
+    </mat-card-content>
+  </mat-card>
+</div>

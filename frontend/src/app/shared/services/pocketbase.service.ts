@@ -8,12 +8,13 @@ import {
   map,
   switchMap,
 } from 'rxjs';
+import { environment } from 'src/environments/environment';
 
 @Injectable({
   providedIn: 'root',
 })
 export class PocketbaseService {
-  private pb = new PocketBase('http://localhost:8090');
+  private pb = new PocketBase(environment.API_BASE_URL);
 
   constructor() {
     this.currentUser$.next(this.pb.authStore.model);

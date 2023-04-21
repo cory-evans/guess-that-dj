@@ -1,10 +1,12 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
-import { UnsubscribeFunc } from 'pocketbase';
-import { BehaviorSubject } from 'rxjs';
+import { ClientResponseError, UnsubscribeFunc } from 'pocketbase';
+import { BehaviorSubject, Subject, tap, withLatestFrom } from 'rxjs';
 import { PocketbaseService } from 'src/app/shared/services/pocketbase.service';
-import { Game } from '../games.models';
+import { Game } from '../../shared/models/games.models';
 import { Router } from '@angular/router';
+import { UntilDestroy, untilDestroyed } from '@ngneat/until-destroy';
 
+@UntilDestroy()
 @Component({
   selector: 'app-list',
   templateUrl: './list.component.html',
@@ -17,6 +19,7 @@ export class ListComponent implements OnDestroy, OnInit {
   unsubGames?: UnsubscribeFunc;
 
   ngOnInit(): void {
+    this.join_game$.pipe(untilDestroyed(this)).subscribe();
     this.pb
       .Collection('games')
       .getFullList<Game>()
@@ -55,21 +58,35 @@ export class ListComponent implements OnDestroy, OnInit {
     if (this.unsubGames) this.unsubGames();
   }
 
+  user$ = this.pb.CurrentUser();
+
   async joinGame(id: string) {
-    this.router.navigate(['games', id]);
-    // const myId = this.pb.authStore().model?.id;
-    // if (!myId) return;
-
-    // const membership = await this.pb
-    //   .Collection('game_member')
-    //   .getFirstListItem(`user = "${myId}" && game = "${id}"`)
-    //   .catch(() => undefined);
-
-    // if (!membership) {
-    //   await this.pb.Collection('game_member').create({
-    //     user: myId,
-    //     game: id,
-    //   });
-    // }
+    this.join_game_event$.next(id);
   }
+
+  join_game_event$ = new Subject<string>();
+  join_game$ = this.join_game_event$.pipe(
+    withLatestFrom(this.user$),
+    tap(([id, user]) => {
+      if (!user) return;
+
+      this.pb
+        .Collection('game_member')
+        .getFirstListItem(`user = "${user.id}" && game = "${id}"`)
+        .catch(async (err: ClientResponseError) => {
+          if (err.status == 404) {
+            // create new record
+            return await this.pb.Collection('game_member').create({
+              user: user.id,
+              game: id,
+              ready: false,
+            });
+          }
+          return undefined;
+        })
+        .then((record) => {
+          if (record) this.router.navigate(['games', id]);
+        });
+    })
+  );
 }

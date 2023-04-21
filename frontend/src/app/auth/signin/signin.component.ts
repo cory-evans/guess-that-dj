@@ -41,7 +41,7 @@ export class SigninComponent {
           response_type: 'code',
           client_id: '6160bd350ff14394a537ac0cddf0c12e',
           scope: scope,
-          redirect_uri: 'http://localhost:4200/auth/callback',
+          redirect_uri: window.location.origin + '/auth/callback',
           state: state,
           code_challenge_method: 'S256',
           code_challenge: codeChallenge,

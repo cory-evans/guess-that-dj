@@ -1,5 +1,9 @@
 import { Component, Input, OnInit } from '@angular/core';
-import { Game, GameTrack } from '../../games.models';
+import {
+  Game,
+  GameState,
+  GameTrack,
+} from '../../../shared/models/games.models';
 import { PocketbaseService } from 'src/app/shared/services/pocketbase.service';
 import { ActivatedRoute } from '@angular/router';
 import { UntilDestroy, untilDestroyed } from '@ngneat/until-destroy';
@@ -17,6 +21,7 @@ import {
   tap,
 } from 'rxjs';
 import { SpotifyService } from 'src/app/shared/services/spotify.service';
+import { Record } from 'pocketbase';
 
 @UntilDestroy()
 @Component({
@@ -27,6 +32,7 @@ export class PrepareComponent implements OnInit {
   my_tracks: GameTrack[] = [];
 
   @Input() game: Game | null = null;
+  @Input() owner: Record | null = null;
 
   constructor(
     private pb: PocketbaseService,
@@ -34,6 +40,7 @@ export class PrepareComponent implements OnInit {
     private activeRoute: ActivatedRoute
   ) {
     this.add_track$.pipe(untilDestroyed(this)).subscribe();
+    this.start_game$.pipe(untilDestroyed(this)).subscribe();
   }
 
   ngOnInit(): void {
@@ -116,4 +123,72 @@ export class PrepareComponent implements OnInit {
       );
     })
   );
+
+  start_game() {
+    this.start_game_event$.next();
+  }
+
+  start_game_event$ = new Subject<void>();
+  start_game$ = this.start_game_event$.pipe(
+    tap(async () => {
+      if (!this.game) return;
+
+      // get all added songs
+      const all_songs = await this.pb
+        .Collection('game_tracks')
+        .getFullList<GameTrack>({
+          filter: `game = "${this.game.id}"`,
+        });
+
+      const song_ids = shuffle_array(all_songs.map((s) => s.id));
+
+      const new_state: GameState = {
+        index: 0,
+        view: 'vote',
+        songs: song_ids,
+      };
+
+      // get members
+      const all_members = await this.pb.Collection('game_member').getFullList({
+        filter: `game = "${this.game.id}"`,
+        expand: 'user',
+      });
+
+      const members_json: Game['members_json'] = all_members.map((r) => {
+        const u = r.expand['user'];
+        if (u instanceof Array) throw new Error('user expand was array');
+
+        return {
+          created: u.created,
+          updated: u.updated,
+          id: u.id,
+          username: u['username'],
+        };
+      });
+
+      this.pb
+        .Collection('games')
+        .update(this.game.id, { state_json: new_state, members_json });
+    })
+  );
 }
+
+const shuffle_array = <T>(array: Array<T>) => {
+  let currentIndex = array.length,
+    randomIndex;
+
+  // While there remain elements to shuffle.
+  while (currentIndex != 0) {
+    // Pick a remaining element.
+    randomIndex = Math.floor(Math.random() * currentIndex);
+    currentIndex--;
+
+    // And swap it with the current element.
+    [array[currentIndex], array[randomIndex]] = [
+      array[randomIndex],
+      array[currentIndex],
+    ];
+  }
+
+  return array;
+};

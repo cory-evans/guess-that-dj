@@ -7,7 +7,7 @@ import { AvatarService } from '../../services/avatar.service';
 })
 export class AvatarIconComponent implements OnInit {
   @Input() userId?: string;
-  @Input() size: 'sm' | 'md' | 'lg' = 'md';
+  @Input() size: 'sm' | 'md' | 'lg' | 'auto' = 'md';
   @Input() rounded = true;
 
   url?: string;
@@ -15,13 +15,8 @@ export class AvatarIconComponent implements OnInit {
   constructor(private avatarService: AvatarService) {}
 
   ngOnInit(): void {
-    if (this.userId) {
-      this.avatarService
-        .getAvatarForUser(this.userId)
-        .subscribe((url) => (this.url = url));
-    } else {
-      const n = Math.floor(Math.random() * 9);
-      this.url = `http://localhost:8090/_/images/avatars/avatar${n}.svg`;
-    }
+    this.avatarService
+      .getAvatarForUser(this.userId)
+      .subscribe((url) => (this.url = url));
   }
 }

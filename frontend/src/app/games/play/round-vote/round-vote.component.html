@@ -1,1 +1,23 @@
-<p>round-vote works!</p>
+<div class="flex flex-col space-y-2" *ngIf="gameTrack$ | async as track">
+  <mat-card>
+    <mat-card-header>
+      <img [src]="track.track_album_image_url" mat-card-avatar class="max-w-xs mb-2" />
+      <mat-card-title>{{ track.track_name }}</mat-card-title>
+      <mat-card-subtitle>{{ track.track_artists_csv }}</mat-card-subtitle>
+    </mat-card-header>
+  </mat-card>
+
+  <mat-card>
+    <mat-card-header>
+      <mat-card-title>Vote</mat-card-title>
+    </mat-card-header>
+    <mat-card-content *ngIf="members">
+      <mat-selection-list [multiple]="false" (selectionChange)="voteChange($event)">
+        <ng-container *ngFor="let m of members; let last=last">
+          <mat-list-option [value]="m.id" [selected]="my_vote?.vote == m.id">{{ m.username }}</mat-list-option>
+          <mat-divider *ngIf="!last" />
+        </ng-container>
+      </mat-selection-list>
+    </mat-card-content>
+  </mat-card>
+</div>

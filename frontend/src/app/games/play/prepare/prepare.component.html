@@ -1,11 +1,11 @@
 <div class="flex flex-col space-y-2 m-2" *ngIf="user$ | async as user">
-  <pre>{{ game | json }}</pre>
+  <!-- <pre>{{ game | json }}</pre> -->
   <mat-card *ngIf="game">
     <mat-card-header>
-      <mat-card-title>{{ game.owner }}'s game</mat-card-title>
+      <mat-card-title *ngIf="owner">{{ owner['username'] }}'s game</mat-card-title>
     </mat-card-header>
     <mat-card-actions align="end">
-      <button mat-raised-button *ngIf="game.owner == user.id" color="primary">Start</button>
+      <button mat-raised-button *ngIf="game.owner == user.id" color="primary" (click)="start_game()">Start</button>
     </mat-card-actions>
   </mat-card>
   <mat-card>
@@ -13,7 +13,7 @@
       <mat-card-title>My Songs</mat-card-title>
     </mat-card-header>
     <mat-card-content>
-      <mat-list>
+      <mat-action-list>
         <ng-container *ngFor="let t of my_tracks; let last=last">
           <mat-list-item>
             <mat-icon matListItemAvatar>
@@ -25,7 +25,7 @@
 
           <mat-divider *ngIf="!last" />
         </ng-container>
-      </mat-list>
+      </mat-action-list>
     </mat-card-content>
   </mat-card>
 
@@ -54,7 +54,7 @@
         </mat-form-field>
       </div>
 
-      <mat-list>
+      <mat-action-list>
         <ng-container
           *ngFor="let track of searchResults$ | async; let last=last"
         >
@@ -67,7 +67,7 @@
         </mat-list-item>
         <mat-divider *ngIf="!last" />
       </ng-container>
-      </mat-list>
+      </mat-action-list>
     </mat-card-content>
   </mat-card>
 </div>

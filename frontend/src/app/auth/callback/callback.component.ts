@@ -7,6 +7,9 @@ import { PocketbaseService } from 'src/app/shared/services/pocketbase.service';
 @Component({
   selector: 'app-callback',
   templateUrl: './callback.component.html',
+  host: {
+    class: 'flex-1 flex flex-col',
+  },
 })
 export class CallbackComponent {
   constructor(
